@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - webgl shader template</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!--
+
+
+<script type="fragment-shader" id="fragmentShader">
+#extension GL_OES_standard_derivatives : enable
+precision highp float;
+uniform float time;
+uniform vec2 mouse;
+uniform vec2 resolution;
+
+#define rotate2D(a) mat2(cos(a), -sin(a), sin(a), cos(a))
+
+void main(void) {
+    // Calcul de la position normalisée des pixels
+    vec2 p = (4. * gl_FragCoord.xy - resolution.xy) / resolution.y;
+    vec2 i = p;
+    float c = 0.0;
+    float inten = 0.15;
+    float r = length(p + vec2(cos(time * 0.12), sin(time * 0.13 + 2.0)) * 1.5);
+
+    for (float n = 0.0; n < 3.0; n++) {
+        float t = r - time / (n + 1.5);
+        i -= p + vec2(cos(t - i.x - r) + sin(t + i.y), sin(t - i.y) + cos(t + i.x) + r);
+        c += 1.0 / length(vec2(sin(i.x + t) / inten, cos(i.y + t) / inten));
+        i *= rotate2D(time * 0.2);
+    }
+
+    // Couleur de base dynamique
+    vec3 baseColor = vec3(c * 0.25) * vec3(1.0, 0.0, 4.3) - 0.1;
+
+    // Effet Iridescent Chromatique
+    float hue = atan(p.y, p.x) / 3.1416; // Variation de teinte en fonction de l'angle
+    vec3 iridescence = vec3(0.5 + 0.5 * cos(6.28318 * (hue + vec3(0.8, 0.1, 0.1) + time * 0.1)));
+
+    // Position de la souris pour un effet interactif
+    vec2 mouseEffect = (mouse - resolution.xy / 2.0) / resolution.y;
+    float distanceFromMouse = length(p - mouseEffect);
+    float mouseInfluence = smoothstep(0.1, 0.3, 1.0 - distanceFromMouse);
+
+    // Mélange des couleurs avec influence de la souris
+    vec3 dynamicColor = mix(baseColor, iridescence, 0.5);
+    dynamicColor = mix(dynamicColor, vec3(1.0, 1.0, 1.0), mouseInfluence * 0.5);
+
+    // Calculer la taille des points dynamiquement
+    float pointSize = 0.02 + 0.01 * sin(time * 1.0 + r * 2.0); // Taille des points dynamique
+    float threshold = 0.25;  // Seuil pour l'effet de pointillisme
+
+    // Calculer le ratio d'aspect
+    float aspectRatio = resolution.x / resolution.y;
+
+    // Adapter la position sur la grille en fonction du ratio d'aspect et de la taille dynamique des points
+    vec2 gridPos = fract(gl_FragCoord.xy / (resolution * vec2(pointSize * aspectRatio, pointSize)));
+
+    // Créer un masque basé sur la distance au centre de chaque cellule de la grille
+    float mask = step(threshold, length(gridPos - 0.5));
+
+    // Couleur des points (noir)
+    vec3 pointColor = vec3(0.0, 0.0, 0.0);
+
+    // Mélanger la couleur des points avec la couleur de base
+    vec3 finalColor = mix(dynamicColor, pointColor, mask);
+
+    // Effet de Bloom Avancé
+    float bloom = smoothstep(0.8, 1.0, length(finalColor)); // Ajout d'une lueur autour des zones lumineuses
+    finalColor += finalColor * bloom * 0.8; // Intensifier la lumière
+
+    // Ajuster le contraste pour plus d'impact visuel
+    float contrast = 1.2;
+    finalColor = ((finalColor - 0.5) * contrast) + 0.5;
+
+    gl_FragColor = vec4(finalColor, 1.0);
+}
+</script>
+
+-->
+<!-- 
+<script type="fragment-shader" id="fragmentShader">
+precision highp float;
+uniform float time;
+uniform vec2 resolution;
+
+// Fonction de bruit simple 2D
+float noise(vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void main(void) {
+    // Normalisation des coordonnées du fragment
+    vec2 uv = gl_FragCoord.xy / resolution.xy;
+    vec2 p = (uv * 2.0 - 1.0) * vec2(resolution.x / resolution.y, 1.0); // Correction du ratio d'aspect
+    
+    // Déplacement des coordonnées de bruit avec le temps pour animation
+    vec2 noiseCoords = p * 10.0 + vec2(time * 0.1);
+    
+    // Calcul du bruit simple pour la couleur
+    float noiseValue = noise(noiseCoords);
+
+    // Couleurs de camouflage
+    vec3 color1 = vec3(0.2, 0.3, 0.1); // Vert foncé
+    vec3 color2 = vec3(0.4, 0.5, 0.2); // Vert moyen
+    vec3 color3 = vec3(0.7, 0.6, 0.4); // Beige
+    vec3 color4 = vec3(0.2, 0.2, 0.2); // Gris foncé
+
+    // Mélange des couleurs en fonction du bruit
+    vec3 colorMix1 = mix(color1, color2, smoothstep(0.2, 0.4, noiseValue));
+    vec3 colorMix2 = mix(color3, color4, smoothstep(0.4, 0.6, noiseValue));
+    vec3 baseColor = mix(colorMix1, colorMix2, smoothstep(0.6, 0.8, noiseValue));
+    
+    // Sortie finale du fragment
+    gl_FragColor = vec4(baseColor, 1.0);
+}
+</script>
+-->
+
+<script type="fragment-shader" id="fragmentShader">
+precision highp float;
+uniform float time;
+uniform vec2 resolution;
+
+// Fonction de palette de couleurs
+vec3 palette(float t) {
+    vec3 a = vec3(0.5, 0.5, 0.5);
+    vec3 b = vec3(0.5, 0.5, 0.5);
+    vec3 c = vec3(1.0, 1.0, 1.0);
+    vec3 d = vec3(0.263, 0.916, 0.557);
+    return a + b * cos(6.28318 * (c * t + d * d));
+}
+
+void main(void) {
+    // Normalisation des coordonnées du fragment
+    vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / resolution.y;
+    vec2 uv0 = uv;
+    vec3 finalColor = vec3(0.0);
+
+    for (float i = 0.0; i < 8.0; i++) {
+        uv = fract(uv * 1.5) - 0.5;
+
+        float d = length(uv) - exp(-length(uv0));
+        vec3 col = palette(length(uv0) + i * 0.2 + time * 0.4);
+
+        d = sin(d * 8.0 + time) / 8.0;
+        d = abs(d);
+        d = pow(0.01 / d, 1.2);
+
+        finalColor += col * d;
+    }
+
+    gl_FragColor = vec4(finalColor, 1.0);
+}
+</script>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
